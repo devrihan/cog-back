@@ -80,15 +80,63 @@ def analyze_orders(orders, stations: int):
 
 
 # ----------- INVENTORY ANALYZER ----------- #
+# def analyze_inventory(skuData):
+#     """
+#     Analyze inventory before optimization.
+#     Returns demand, stock stats, forecast accuracy.
+#     """
+#     if not skuData:
+#         return {
+#             "totalForecastDemand": 0, "totalActualDemand": 0, "totalStock": 0,
+#             "forecastAccuracy": 0, "likelyShortages": [], "likelyOverstocks": [],
+#             "insight": "No SKU data provided."
+#         }
+
+#     df = pd.DataFrame([sku.dict() for sku in skuData])
+
+#     total_demand = df["forecastDemand"].sum()
+#     total_actual = df["actualDemand"].sum()
+#     total_stock = df["stock"].sum()
+
+#     # Forecast accuracy = 1 - (|forecast - actual| / forecast)
+#     df["forecastError"] = abs(df["forecastDemand"] - df["actualDemand"])
+    
+#     # Avoid division by zero if total_demand is 0
+#     if total_demand > 0:
+#         forecast_accuracy = round(100 * (1 - df["forecastError"].sum() / total_demand), 2)
+#     else:
+#         forecast_accuracy = 100.0
+
+#     shortages = df[df["stock"] < df["actualDemand"]].to_dict(orient="records")
+#     overstocks = df[df["stock"] > df["actualDemand"]].to_dict(orient="records")
+
+#     return {
+#         "totalForecastDemand": int(total_demand),
+#         "totalActualDemand": int(total_actual),
+#         "totalStock": int(total_stock),
+#         "forecastAccuracy": forecast_accuracy,
+#         "likelyShortages": shortages,
+#         "likelyOverstocks": overstocks,
+#         "insight": f"Forecast accuracy is {forecast_accuracy}%. Risk of shortages in {len(shortages)} SKUs."
+#     }
+
+import numpy as np
+import pandas as pd
+
+# ... (keep the existing analyze_orders function)
+
+
+# ----------- INVENTORY ANALYZER ----------- #
 def analyze_inventory(skuData):
     """
     Analyze inventory before optimization.
-    Returns demand, stock stats, forecast accuracy.
+    Returns demand, stock stats, forecast accuracy, and supplier insights.
     """
     if not skuData:
         return {
             "totalForecastDemand": 0, "totalActualDemand": 0, "totalStock": 0,
             "forecastAccuracy": 0, "likelyShortages": [], "likelyOverstocks": [],
+            "supplierReliability": [],
             "insight": "No SKU data provided."
         }
 
@@ -98,10 +146,8 @@ def analyze_inventory(skuData):
     total_actual = df["actualDemand"].sum()
     total_stock = df["stock"].sum()
 
-    # Forecast accuracy = 1 - (|forecast - actual| / forecast)
     df["forecastError"] = abs(df["forecastDemand"] - df["actualDemand"])
     
-    # Avoid division by zero if total_demand is 0
     if total_demand > 0:
         forecast_accuracy = round(100 * (1 - df["forecastError"].sum() / total_demand), 2)
     else:
@@ -109,6 +155,13 @@ def analyze_inventory(skuData):
 
     shortages = df[df["stock"] < df["actualDemand"]].to_dict(orient="records")
     overstocks = df[df["stock"] > df["actualDemand"]].to_dict(orient="records")
+    
+    # New analysis for supplier reliability
+    supplier_reliability = df.groupby('supplierReliability').agg(
+        num_skus=('sku', 'count'),
+        avg_stock=('stock', 'mean')
+    ).reset_index().to_dict(orient='records')
+
 
     return {
         "totalForecastDemand": int(total_demand),
@@ -117,5 +170,6 @@ def analyze_inventory(skuData):
         "forecastAccuracy": forecast_accuracy,
         "likelyShortages": shortages,
         "likelyOverstocks": overstocks,
-        "insight": f"Forecast accuracy is {forecast_accuracy}%. Risk of shortages in {len(shortages)} SKUs."
+        "supplierReliability": supplier_reliability,
+        "insight": f"Forecast accuracy is {forecast_accuracy}%. Supplier reliability analysis is available."
     }
