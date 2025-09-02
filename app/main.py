@@ -15,7 +15,9 @@ origins = [
     "http://localhost:3000",  # Another common local port
     # Add your deployed frontend URL here when you have it
     "https://cog-front.vercel.app",
-    "https://cog-front.vercel.app/load-balancer"
+    "https://cog-front.vercel.app/load-balancer",
+    "https://cogni-haka.vercel.app/load-balancer",
+    "https://cogni-haka.vercel.app"
 ]
 
 app.add_middleware(

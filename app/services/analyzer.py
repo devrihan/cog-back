@@ -120,10 +120,7 @@ def analyze_orders(orders, stations: int):
 #         "insight": f"Forecast accuracy is {forecast_accuracy}%. Risk of shortages in {len(shortages)} SKUs."
 #     }
 
-import numpy as np
-import pandas as pd
 
-# ... (keep the existing analyze_orders function)
 
 
 # ----------- INVENTORY ANALYZER ----------- #
